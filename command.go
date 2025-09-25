@@ -13,6 +13,8 @@ import (
 // Command is a struct that holds arguments and their values to run FFmpeg
 type Command struct {
 	FFmpegPath string
+	WorkDir     string
+	CmdEnvs    []string
 	Args       *Args
 	input      io.Reader
 	output     io.Writer
@@ -34,6 +36,16 @@ func NewCommand(ffmpegPath string) *Command {
 	}
 }
 
+func (c *Command) SetCmdEnvs(envs []string) *Command {
+	c.CmdEnvs = envs
+	return c
+}
+
+func (c *Command) SetWorkDir(workDir string) *Command {
+	c.WorkDir = workDir
+	return c
+}
+
 // Run runs the FFmpeg command. It returns an error if the command fails with exit status code 1. This error message only signifies that
 // the command returned a non-zero status code, read from stderr to see more comprehensive FFmpeg errors.
 func (c *Command) Run() error {
@@ -53,6 +65,10 @@ func (c *Command) Build() *exec.Cmd {
 // BuildWithContext is like Build but includes a context which is used to kill the process
 func (c *Command) BuildWithContext(ctx context.Context) *exec.Cmd {
 	cmd := exec.CommandContext(ctx, c.FFmpegPath, c.GetArgs()...)
+
+	if c.WorkDir != "" {
+		cmd.Dir = c.WorkDir
+	}
 
 	if c.input != nil {
 		cmd.Stdin = c.input
