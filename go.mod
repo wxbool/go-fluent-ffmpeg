@@ -1,4 +1,4 @@
-module github.com/modfy/fluent-ffmpeg
+module github.com/wxbool/fluent-ffmpeg
 
 go 1.15
 
